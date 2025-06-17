@@ -39,6 +39,13 @@ class GuruResource extends Resource
                     ->tel()
                     ->required()
                     ->maxLength(255),
+                Forms\Components\Select::make('kelas')
+                    ->relationship('kelas', 'nama_kelas')
+                    ->multiple()
+                    ->preload()
+                    ->searchable()
+                    ->label('Kelas yang di ajar')
+                    ->required(),
                 Forms\Components\Textarea::make('alamat')
                     ->required()
                     ->maxLength(65535)

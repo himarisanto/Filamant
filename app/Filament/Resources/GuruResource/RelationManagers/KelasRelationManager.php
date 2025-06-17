@@ -58,4 +58,4 @@ class KelasRelationManager extends RelationManager
                 ]),
             ]);
     }
-}
+} 

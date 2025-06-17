@@ -3,15 +3,16 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\SiswaResource\Pages;
-use App\Filament\Resources\SiswaResource\RelationManagers;
 use App\Models\Siswa;
+use App\Models\Kelas;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\SelectColumn;
+
 
 class SiswaResource extends Resource
 {
@@ -57,8 +58,9 @@ class SiswaResource extends Resource
                 Tables\Columns\TextColumn::make('nama'),
                 Tables\Columns\TextColumn::make('email'),
                 Tables\Columns\TextColumn::make('no_hp'),
-                Tables\Columns\TextColumn::make('kelas.nama_kelas')
-                    ->sortable(),
+                Tables\Columns\SelectColumn::make('kelas_id')
+                ->options(Kelas::all()->pluck('nama_kelas', 'id'))
+                ->rules(['required']),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('kelas')
