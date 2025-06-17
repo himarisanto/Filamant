@@ -29,10 +29,10 @@ class Guru extends Model
         return $this->hasManyThrough(
             Siswa::class,
             Kelas::class,
-            'id', // Foreign key on kelas table
-            'kelas_id', // Foreign key on siswas table
-            'id', // Local key on gurus table
-            'id' // Local key on kelas table
+            'id',
+            'kelas_id',
+            'id',
+            'id' 
         )->whereHas('kelas', function ($query) {
             $query->whereHas('gurus', function ($q) {
                 $q->where('gurus.id', $this->id);

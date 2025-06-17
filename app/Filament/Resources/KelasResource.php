@@ -10,6 +10,8 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Collection;
 
 class KelasResource extends Resource
 {
@@ -50,7 +52,6 @@ class KelasResource extends Resource
                 Tables\Columns\TextColumn::make('tingkat')
                     ->searchable()
                     ->sortable(),
-
                 Tables\Columns\TextColumn::make('siswas_count')
                     ->label('Jumlah Siswa')
                     ->counts('siswas')
@@ -62,11 +63,61 @@ class KelasResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->before(function (Tables\Actions\DeleteAction $action, Kelas $record) {
+                        if ($record->siswas()->count() > 0) {
+                            Notification::make()
+                                ->title('Tidak dapat menghapus kelas')
+                                ->body('Kelas ini masih memiliki siswa yang terdaftar.')
+                                ->danger()
+                                ->send();
+
+                            $action->cancel();
+                        }
+
+                        if ($record->gurus()->count() > 0) {
+                            Notification::make()
+                                ->title('Tidak dapat menghapus kelas')
+                                ->body('Kelas ini masih memiliki guru yang mengajar.')
+                                ->danger()
+                                ->send();
+
+                            $action->cancel();
+                        }
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->before(function (Tables\Actions\DeleteBulkAction $action, Collection $records) {
+                            $shouldCancel = false;
+
+                            foreach ($records as $record) {
+                                if ($record->siswas()->count() > 0) {
+                                    Notification::make()
+                                        ->title('Tidak dapat menghapus kelas')
+                                        ->body("Kelas {$record->nama_kelas} masih memiliki siswa yang terdaftar.")
+                                        ->danger()
+                                        ->send();
+
+                                    $shouldCancel = true;
+                                }
+
+                                if ($record->gurus()->count() > 0) {
+                                    Notification::make()
+                                        ->title('Tidak dapat menghapus kelas')
+                                        ->body("Kelas {$record->nama_kelas} masih memiliki guru yang mengajar.")
+                                        ->danger()
+                                        ->send();
+
+                                    $shouldCancel = true;
+                                }
+                            }
+
+                            if ($shouldCancel) {
+                                $action->cancel();
+                            }
+                        }),
                 ]),
             ]);
     }
